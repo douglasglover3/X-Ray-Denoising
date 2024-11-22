@@ -7,10 +7,11 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 from AutoEncoder import AutoEncoder 
+from AddGaussianNoise import AddGaussianNoise
 import argparse
 import numpy as np 
 
-def train(autoencoder: AutoEncoder, device, train_dataset, optimizer, criterion, batch_size):
+def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, optimizer, criterion, batch_size):
     '''
     Trains the model for an epoch and optimizes it.
     device: 'cuda' or 'cpu'.
@@ -30,15 +31,19 @@ def train(autoencoder: AutoEncoder, device, train_dataset, optimizer, criterion,
     images = []
     for batch_index in range(num_batches):
         data_array = [train_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
+        noisy_array = [train_noisy_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
 
         data = torch.tensor(np.array(data_array))
         data = data.to(device)
+
+        noisy = torch.tensor(np.array(noisy_array))
+        noisy = noisy.to(device)
         
         # Reset optimizer gradients. Avoids grad accumulation (accumulation used in RNN).
         optimizer.zero_grad()
         
         # Do forward pass for current set of data
-        output: torch.Tensor = autoencoder(data)
+        output: torch.Tensor = autoencoder(noisy)
         loss = criterion(output, data)
         # Computes gradient based on final loss
         loss.backward()
@@ -49,19 +54,22 @@ def train(autoencoder: AutoEncoder, device, train_dataset, optimizer, criterion,
 
         percent = 100 * (batch_index / num_batches)
         bar = '█' * int(percent) + '-' * (100 - int(percent))
-        print(f' Batch {batch_index} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
+        print(f'\tBatch {batch_index} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
+
+    print('\n')
         
     #Save one image from this epoch
-    images.append(('Image', data[0].permute(1, 2, 0)))
+    images.append(('Original Image', data[0].permute(1, 2, 0)))
+    images.append(('Noisy Image', noisy[0].permute(1, 2, 0)))
     images.append(('Decoded Image', output[0].permute(1, 2, 0).detach().numpy()))       
         
     train_loss = float(np.mean(losses))
-    print('\nTrain set: Average loss: {:.4f}\n'.format(float(np.mean(losses))))
+    print('Train set: Average loss: {:.4f}\n'.format(float(np.mean(losses))))
     
     return train_loss, images
     
 
-def test(autoencoder: AutoEncoder, device, test_dataset, batch_size):
+def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, batch_size):
     '''
     Tests the model.
     model: The model to train. Should already be in correct device.
@@ -75,34 +83,40 @@ def test(autoencoder: AutoEncoder, device, test_dataset, batch_size):
     images = []
     # Set torch.no_grad() to disable gradient computation and backpropagation
     with torch.no_grad():
-        num_batches = int(np.ceil(len(test_dataset) / batch_size))
+        num_batches = int(np.ceil(len(test_dataset) / batch_size)) - 1
         
         for batch_index in range(0, num_batches):
             data_array = [test_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
+            noisy_array = [test_noisy_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
 
             data = torch.tensor(np.array(data_array))
             data = data.to(device)
-            
+
+            noisy = torch.tensor(np.array(noisy_array))
+            noisy = noisy.to(device)
+
             # Predict for data by doing forward pass
-            output: torch.Tensor = autoencoder(data)
+            output: torch.Tensor = autoencoder(noisy)
             
-            images.append(('Image ' + str(batch_index), data[0].permute(1, 2, 0)))
+            images.append(('Original Image ' + str(batch_index), data[0].permute(1, 2, 0)))
+            images.append(('Noisy Image ' + str(batch_index), noisy[0].permute(1, 2, 0)))
             images.append(('Decoded Image ' + str(batch_index), output[0].permute(1, 2, 0).detach().numpy()))
 
             percent = 100 * (batch_index / num_batches)
             bar = '█' * int(percent) + '-' * (100 - int(percent))
-            print(f' Batch {batch_index} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
-
+            print(f'\tBatch {batch_index} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
+        print('\n')
+            
     #Save one image from each batch
-    fig, axes = plt.subplots(1, 2)
+    fig, axes = plt.subplots(1, 3)
     for index, (title, image) in enumerate(images):
-        im = axes[index % 2]
+        im = axes[index % 3]
         im.imshow(image)
         im.set_title(title)
         im.axis('off')
-        if index % 2 == 1:
+        if index % 3 == 2:
             plt.tight_layout()
-            plt.savefig(f'./outputs/test/result_{int(index / 2)}.png')
+            plt.savefig(f'./outputs/test/result_{int(index / 3) + 1}.png')
 
     
     return
@@ -131,9 +145,18 @@ def run_main(FLAGS):
         transforms.ToTensor()
     ])
 
-    dataset = datasets.ImageFolder(path, transform=tensor_transform)
+    noisy_transform = transforms.Compose([
+        transforms.ToTensor(),
+        AddGaussianNoise(0., 1.)
+    ])
 
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.9, 0.1])
+    dataset = datasets.ImageFolder(path, transform=tensor_transform)
+    noisy_dataset = datasets.ImageFolder(path, transform=noisy_transform)
+
+    generator1 = torch.Generator().manual_seed(123)
+    generator2 = torch.Generator().manual_seed(123)
+    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.9, 0.1], generator1)
+    train_noisy_dataset, test_noisy_dataset = torch.utils.data.random_split(noisy_dataset, [0.9, 0.1], generator2)
 
     #create folders for output images if they dont exist
     if not os.path.exists("./outputs/train"): 
@@ -146,12 +169,12 @@ def run_main(FLAGS):
 
     for epoch in range(1, FLAGS.num_epochs + 1):
         print("\nEpoch: " + str(epoch) + "\n")
-        train_loss, images = train(model, device, train_dataset, optimizer, criterion, FLAGS.batch_size)
+        train_loss, images = train(model, device, train_dataset, train_noisy_dataset, optimizer, criterion, FLAGS.batch_size)
         train_loss_array.append(train_loss)
 
         
         #Save image of epoch
-        fig, axes = plt.subplots(1, 2)
+        fig, axes = plt.subplots(1, 3)
 
         #Input
         im = axes[0]
@@ -159,10 +182,16 @@ def run_main(FLAGS):
         im.imshow(images[0][1])
         im.axis('off')
 
-        #Output
+        #Noisy
         im = axes[1]
         im.set_title(images[1][0])
         im.imshow(images[1][1])
+        im.axis('off')
+
+        #Output
+        im = axes[2]
+        im.set_title(images[2][0])
+        im.imshow(images[2][1])
         im.axis('off')
 
         plt.tight_layout()
@@ -172,8 +201,8 @@ def run_main(FLAGS):
     
     print("Training finished")
     print("Testing...")
-    test(model, device, test_dataset, FLAGS.batch_size)
-    print("\nTesting finished")
+    test(model, device, test_dataset, test_noisy_dataset, FLAGS.batch_size)
+    print("Testing finished")
     
     
     
