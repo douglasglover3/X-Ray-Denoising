@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from AutoEncoder import AutoEncoder 
 import argparse
 import numpy as np 
-import kagglehub
 
 def train(autoencoder: AutoEncoder, device, train_dataset, optimizer, criterion, batch_size):
     '''
