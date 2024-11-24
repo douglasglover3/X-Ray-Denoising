@@ -18,7 +18,7 @@ class AutoEncoder(nn.Module):
         self.decoder_conv3 = nn.Conv2d(32, 32, 3, padding=1)
         self.decoder_conv4 = nn.Conv2d(32, 3, 3, padding=1)
         
-        self.forward = self.autoencoder2
+        self.forward = self.autoencoder1
     
     #Convolutional Autoencoder
     def autoencoder1(self, X):
