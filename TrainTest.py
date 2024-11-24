@@ -52,9 +52,9 @@ def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, 
         # Optimize model parameters based on learning rate and gradient 
         optimizer.step()
 
-        percent = 100 * (batch_index / num_batches)
+        percent = 100 * ((batch_index + 1) / num_batches)
         bar = '█' * int(percent) + '-' * (100 - int(percent))
-        print(f'\tBatch {batch_index} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
+        print(f'\tBatch {batch_index + 1} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
 
     print('\n')
         
@@ -102,9 +102,9 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
             images.append(('Noisy Image ' + str(batch_index), noisy[0].permute(1, 2, 0)))
             images.append(('Decoded Image ' + str(batch_index), output[0].permute(1, 2, 0).detach().numpy()))
 
-            percent = 100 * (batch_index / num_batches)
+            percent = 100 * ((batch_index + 1) / num_batches)
             bar = '█' * int(percent) + '-' * (100 - int(percent))
-            print(f'\tBatch {batch_index} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
+            print(f'\tBatch {batch_index + 1} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
         print('\n')
             
     #Save one image from each batch
