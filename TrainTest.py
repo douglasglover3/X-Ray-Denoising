@@ -55,8 +55,6 @@ def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, 
         percent = 100 * ((batch_index + 1) / num_batches)
         bar = '█' * int(percent) + '-' * (100 - int(percent))
         print(f'\tBatch {batch_index + 1} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
-        if batch_index > 3:
-            break
 
     print('\n')
 
