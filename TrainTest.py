@@ -27,7 +27,7 @@ def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, 
     # Empty list to store losses 
     losses = []
     
-    num_batches = int(np.ceil(len(train_dataset) / batch_size))
+    num_batches = int(np.floor(len(train_dataset) / batch_size))
     images = []
     for batch_index in range(num_batches):
         data_array = [train_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
@@ -55,8 +55,14 @@ def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, 
         percent = 100 * ((batch_index + 1) / num_batches)
         bar = '█' * int(percent) + '-' * (100 - int(percent))
         print(f'\tBatch {batch_index + 1} / {num_batches} |{bar}| {percent:.2f}%', end = "\r")
+        if batch_index > 3:
+            break
 
     print('\n')
+
+    data = data.to('cpu')
+    noisy = noisy.to('cpu')
+    output = output.to('cpu')
         
     #Save one image from this epoch
     images.append(('Original Image', data[0].permute(1, 2, 0)))
@@ -83,20 +89,23 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
     images = []
     # Set torch.no_grad() to disable gradient computation and backpropagation
     with torch.no_grad():
-        num_batches = int(np.ceil(len(test_dataset) / batch_size)) - 1
+        num_batches = int(np.floor(len(test_dataset) / batch_size))
         
         for batch_index in range(0, num_batches):
             data_array = [test_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
             noisy_array = [test_noisy_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
 
             data = torch.tensor(np.array(data_array))
-            data = data.to(device)
 
             noisy = torch.tensor(np.array(noisy_array))
             noisy = noisy.to(device)
 
             # Predict for data by doing forward pass
             output: torch.Tensor = autoencoder(noisy)
+
+            data = data.to('cpu')
+            noisy = noisy.to('cpu')
+            output = output.to('cpu')
             
             images.append(('Original Image ' + str(batch_index), data[0].permute(1, 2, 0)))
             images.append(('Noisy Image ' + str(batch_index), noisy[0].permute(1, 2, 0)))
@@ -116,7 +125,7 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
         im.axis('off')
         if index % 3 == 2:
             plt.tight_layout()
-            plt.savefig(f'./outputs/test/result_{int(index / 3) + 1}.png')
+            plt.savefig(f'./outputs/test/result_{int(index / 3) + 1}.png', dpi=1200)
 
     
     return
@@ -147,7 +156,7 @@ def run_main(FLAGS):
 
     noisy_transform = transforms.Compose([
         transforms.ToTensor(),
-        AddGaussianNoise(0., 1.)
+        AddGaussianNoise(0., 0.5)
     ])
 
     dataset = datasets.ImageFolder(path, transform=tensor_transform)
@@ -166,38 +175,45 @@ def run_main(FLAGS):
 
     # Run training for n_epochs specified in config 
     train_loss_array = []
+    if FLAGS.load_model == False:
+        for epoch in range(1, FLAGS.num_epochs + 1):
+            print("\nEpoch: " + str(epoch) + "\n")
+            train_loss, images = train(model, device, train_dataset, train_noisy_dataset, optimizer, criterion, FLAGS.batch_size)
+            train_loss_array.append(train_loss)
+            torch.save(model.state_dict(), f'./outputs/epoch_{epoch}.pth')
 
-    for epoch in range(1, FLAGS.num_epochs + 1):
-        print("\nEpoch: " + str(epoch) + "\n")
-        train_loss, images = train(model, device, train_dataset, train_noisy_dataset, optimizer, criterion, FLAGS.batch_size)
-        train_loss_array.append(train_loss)
+            
+            #Save image of epoch
+            fig, axes = plt.subplots(1, 3)
 
-        
-        #Save image of epoch
-        fig, axes = plt.subplots(1, 3)
+            #Input
+            im = axes[0]
+            im.set_title(images[0][0])
+            im.imshow(images[0][1])
+            im.axis('off')
 
-        #Input
-        im = axes[0]
-        im.set_title(images[0][0])
-        im.imshow(images[0][1])
-        im.axis('off')
+            #Noisy
+            im = axes[1]
+            im.set_title(images[1][0])
+            im.imshow(images[1][1])
+            im.axis('off')
 
-        #Noisy
-        im = axes[1]
-        im.set_title(images[1][0])
-        im.imshow(images[1][1])
-        im.axis('off')
+            #Output
+            im = axes[2]
+            im.set_title(images[2][0])
+            im.imshow(images[2][1])
+            im.axis('off')
 
-        #Output
-        im = axes[2]
-        im.set_title(images[2][0])
-        im.imshow(images[2][1])
-        im.axis('off')
+            plt.tight_layout()
+            plt.savefig(f'./outputs/train/epoch_{epoch}.png', dpi=1200)
 
-        plt.tight_layout()
-        plt.savefig(f'./outputs/train/epoch_{epoch}.png')
-        
-    
+        torch.save(model.state_dict(), './outputs/model.pth') 
+    else:
+        if os.path.exists("./outputs/model.pth"): 
+            model.load_state_dict(torch.load('./outputs/model.pth', weights_only=True))
+        else:     
+            print("Could not load model.")
+            exit(-1)
     
     print("Training finished")
     print("Testing...")
@@ -205,11 +221,12 @@ def run_main(FLAGS):
     print("Testing finished")
     
     
-    
-    
 if __name__ == '__main__':
     # Set parameters for Sparse Autoencoder
     parser = argparse.ArgumentParser('CNN Exercise.')
+    parser.add_argument('--load_model',
+                        action=argparse.BooleanOptionalAction, default=False, 
+                        help='Adding this flag will load the model from file.')
     parser.add_argument('--learning_rate',
                         type=float, default=0.1,
                         help='Initial learning rate.')

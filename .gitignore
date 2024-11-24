@@ -1,5 +1,4 @@
 /data/images
-/outputs/test
-/outputs/train
+/outputs
 /venv
 /__pycache__
