@@ -171,14 +171,19 @@ def run_main(FLAGS):
     if not os.path.exists("./outputs/test"): 
         os.makedirs("./outputs/test") 
 
+    starting_epoch = 1
+    if FLAGS.load_epoch != None:
+        starting_epoch = FLAGS.load_epoch + 1
+        model.load_state_dict(torch.load(f'./outputs/train/epoch_{FLAGS.load_epoch}.pth', weights_only=True))
+
     # Run training for n_epochs specified in config 
     train_loss_array = []
     if FLAGS.load_model == False:
-        for epoch in range(1, FLAGS.num_epochs + 1):
+        for epoch in range(starting_epoch, FLAGS.num_epochs + 1):
             print("\nEpoch: " + str(epoch) + "\n")
             train_loss, images = train(model, device, train_dataset, train_noisy_dataset, optimizer, criterion, FLAGS.batch_size)
             train_loss_array.append(train_loss)
-            torch.save(model.state_dict(), f'./outputs/epoch_{epoch}.pth')
+            torch.save(model.state_dict(), f'./outputs/train/epoch_{epoch}.pth')
 
             
             #Save image of epoch
@@ -225,6 +230,9 @@ if __name__ == '__main__':
     parser.add_argument('--load_model',
                         action=argparse.BooleanOptionalAction, default=False, 
                         help='Adding this flag will load the model from file.')
+    parser.add_argument('--load_epoch',
+                        type=int, default=None,
+                        help='Epoch to load and to start training from.')
     parser.add_argument('--learning_rate',
                         type=float, default=0.1,
                         help='Initial learning rate.')
