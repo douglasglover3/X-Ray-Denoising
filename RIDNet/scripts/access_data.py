@@ -1,7 +1,7 @@
 from google.cloud import storage
 import os
 
-
+# Code for accessing data from Google Cloud Bucket
 def download_dataset(bucket_name, source_folder, destination_folder):
     # Set up the environment variable for authentication
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/alejandro/Desktop/keys/cap5415-442520-c7b56ba5aa5b.json"
