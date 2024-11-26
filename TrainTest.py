@@ -123,7 +123,7 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
         im.axis('off')
         if index % 3 == 2:
             plt.tight_layout()
-            plt.savefig(f'./outputs/test/result_{int(index / 3) + 1}.png', dpi=1200)
+            plt.savefig(f'./outputs/test/result_{int(index / 3) + 1}.png', dpi=300)
 
     
     return
@@ -234,7 +234,7 @@ if __name__ == '__main__':
                         type=int, default=None,
                         help='Epoch to load and to start training from.')
     parser.add_argument('--learning_rate',
-                        type=float, default=0.1,
+                        type=float, default=0.01,
                         help='Initial learning rate.')
     parser.add_argument('--num_epochs',
                         type=int,
