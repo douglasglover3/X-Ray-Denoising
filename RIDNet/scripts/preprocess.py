@@ -16,6 +16,11 @@ def preprocess_images(input_folder, output_folder, image_size=(256, 256)):
         # Read image
         img = cv2.imread(file_path, cv2.IMREAD_COLOR)
 
+        # Check if the image was successfully loaded
+        if img is None:
+            print(f"Warning: Unable to read file {file_path}. Skipping.")
+            continue
+
         # Convert to grayscale
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
