@@ -20,3 +20,10 @@ def download_dataset(bucket_name, source_folder, destination_folder):
         file_path = os.path.join(destination_folder, os.path.basename(blob.name))
         blob.download_to_filename(file_path)
         print(f"Downloaded {blob.name} to {file_path}")
+
+
+# Download dataset
+bucket_name = "nih-chest-xray-project"
+source_folder = "images/"
+destination_folder = "./data/raw"
+download_dataset(bucket_name, source_folder, destination_folder)
