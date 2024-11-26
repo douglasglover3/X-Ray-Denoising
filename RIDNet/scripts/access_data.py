@@ -3,6 +3,9 @@ import os
 
 
 def download_dataset(bucket_name, source_folder, destination_folder):
+    # Set up the environment variable for authentication
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/alejandro/Desktop/keys/cap5415-442520-c7b56ba5aa5b.json"
+
     # Initialize the client
     client = storage.Client()
 
