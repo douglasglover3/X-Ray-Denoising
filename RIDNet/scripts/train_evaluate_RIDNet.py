@@ -23,6 +23,10 @@ train_transform = transforms.Compose([
 train_dataset = XRayDataset(data_dir="data", split="train")
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-
+# Initialize model, optimizer, and loss function
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = RIDNet().to(device)
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 
