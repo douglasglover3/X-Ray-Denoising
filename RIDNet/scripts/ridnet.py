@@ -20,7 +20,12 @@ class RIDNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        
+        out = self.head(x)
+        residual = out
+        out = self.body(out)
+        out = self.tail(out)
+        return out + residual
+
 
 
 
