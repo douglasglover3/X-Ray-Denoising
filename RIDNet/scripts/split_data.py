@@ -45,5 +45,5 @@ def split_dataset(preprocessed_folder, noisy_folder, output_base_folder, train_s
 split_dataset(
     preprocessed_folder='../data/preprocessed',  # Preprocessed clean data for training
     noisy_folder='../data/noisy',  # Noisy data for validation and testing
-    output_base_folder='./data/final'  # Final output folder for splits
+    output_base_folder='../data/final'  # Final output folder for splits
 )
