@@ -20,5 +20,9 @@ train_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
+train_dataset = XRayDataset(data_dir="data", split="train")
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+
+
 
 
