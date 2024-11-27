@@ -52,3 +52,30 @@ for epoch in range(epochs):
 # Save the model
 torch.save(model.state_dict(), "ridnet.pth")
 print("Model saved to 'ridnet.pth'")
+
+# Testing and visualization
+print("Starting testing...")
+test_dataset = XRayDataset(data_dir="data", split="test")
+test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+model.eval()
+
+to_pil = ToPILImage()
+for idx, (noisy_img, clean_img) in enumerate(test_loader):
+    noisy_img = noisy_img.to(device)
+
+    with torch.no_grad():
+        denoised_img = model(noisy_img).squeeze(0).cpu()
+
+    # Convert images to PIL for visualization
+    noisy_img, denoised_img, clean_img = map(to_pil, [
+        noisy_img.squeeze().cpu(), denoised_img, clean_img.squeeze()
+    ])
+
+    # Show images
+    noisy_img.show(title="Noisy Image")
+    denoised_img.show(title="Denoised Image")
+    clean_img.show(title="Clean Image")
+
+    # Break after showing 5 images for efficiency
+    if idx == 4:
+        break
