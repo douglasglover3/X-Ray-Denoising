@@ -9,3 +9,8 @@ from dataset import XRayDataset
 from ridnet import RIDNet
 import os
 
+# Hyperparameters
+batch_size = 32
+epochs = 50
+learning_rate = 1e-3
+
