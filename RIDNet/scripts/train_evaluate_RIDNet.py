@@ -29,4 +29,22 @@ model = RIDNet().to(device)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
+# Training loop
+print("Starting training...")
+for epoch in range(epochs):
+    model.train()
+    epoch_loss = 0
+    with tqdm(train_loader, unit="batch") as tepoch:
+        for noisy_img, clean_img in tepoch:
+            noisy_img, clean_img = noisy_img.to(device), clean_img.to(device)
 
+            optimizer.zero_grad()
+            denoised_img = model(noisy_img)
+            loss = criterion(denoised_img, clean_img)
+            loss.backward()
+            optimizer.step()
+
+            epoch_loss += loss.item()
+            tepoch.set_postfix(loss=loss.item())
+
+    print(f"Epoch [{epoch + 1}/{epochs}], Loss: {epoch_loss / len(train_loader):.4f}")
