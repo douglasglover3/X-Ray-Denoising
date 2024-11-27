@@ -40,4 +40,24 @@ def add_noise(image, noise_type="gaussian"):
 
 
 def apply_noise(input_folder, output_folder, noise_type="gaussian"):
-    pass
+    # Create the output folder if it does not exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Iterate through all image files in the input folder
+    for file_path in glob(os.path.join(input_folder, '*.*')):
+        
+        # Load the image as grayscale and normalize pixel values to [0, 1]
+        img = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE) / 255.0
+
+        # Add the specified type of noise to the image
+        noisy_img = add_noise(img, noise_type)
+
+        # Construct the output file path
+        output_path = os.path.join(output_folder, os.path.basename(file_path))
+
+        # Save the noisy image, converting pixel values back to the range [0, 255]
+        cv2.imwrite(output_path, (noisy_img * 255).astype(np.uint8))
+
+        # Print a message indicating the operation's success
+        print(f"Added {noise_type} noise and saved: {output_path}")
