@@ -46,7 +46,6 @@ def apply_noise(input_folder, output_folder, noise_type="gaussian"):
 
     # Iterate through all image files in the input folder
     for file_path in glob(os.path.join(input_folder, '*.*')):
-        
         # Load the image as grayscale and normalize pixel values to [0, 1]
         img = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE) / 255.0
 
@@ -61,3 +60,7 @@ def apply_noise(input_folder, output_folder, noise_type="gaussian"):
 
         # Print a message indicating the operation's success
         print(f"Added {noise_type} noise and saved: {output_path}")
+
+
+# Add and apply noise to preprocessed images and write to noisy folder
+apply_noise('../data/preprocessed', '../data/noisy', noise_type="gaussian")
