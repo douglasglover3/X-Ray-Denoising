@@ -11,3 +11,6 @@ class RIDNet(nn.Module):
             *[self.residual_dense_block(64) for _ in range(3)]
         )
         self.tail = nn.Conv2d(64, 1, kernel_size=3, padding=1, bias=True)
+
+    def residual_dense_block(self, channels):
+        
