@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 from torchvision.transforms import ToPILImage
 from tqdm import tqdm
 from dataset import XRayDataset
@@ -13,4 +14,11 @@ import os
 batch_size = 32
 epochs = 50
 learning_rate = 1e-3
+
+# Prepare dataset and data loaders
+train_transform = transforms.Compose([
+    transforms.ToTensor()
+])
+
+
 
