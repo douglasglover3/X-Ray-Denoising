@@ -13,4 +13,14 @@ class RIDNet(nn.Module):
         self.tail = nn.Conv2d(64, 1, kernel_size=3, padding=1, bias=True)
 
     def residual_dense_block(self, channels):
+        layers = []
+        for i in range(4):
+            layers.append(nn.Conv2d(channels, channels, kernel_size=3, padding=1, bias=True))
+            layers.append(nn.ReLU(inplace=True))
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
         
+
+
+
