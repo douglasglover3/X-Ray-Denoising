@@ -11,8 +11,7 @@ class AutoEncoder(nn.Module):
         self.encoder_conv1 = nn.Conv2d(3, 8, 3, padding=1)
         self.encoder_conv2 = nn.Conv2d(8, 16, 3, padding=1)
         self.encoder_conv3 = nn.Conv2d(16, 32, 3, padding=1)
-        self.encoder_conv4 = nn.Conv2d(16, 32, 3, padding=1)
-        self.encoder_conv5 = nn.Conv2d(32, 64, 3, padding=1)
+        self.encoder_conv4 = nn.Conv2d(32, 64, 3, padding=1)
 
         # Defined layers for convolutional decoder
         self.decoder_conv1 = nn.Conv2d(64, 32, 3, padding=1)
@@ -21,7 +20,7 @@ class AutoEncoder(nn.Module):
         self.decoder_conv4 = nn.Conv2d(16, 8, 3, padding=1)
         self.decoder_conv5 = nn.Conv2d(8, 3, 3, padding=1)
         
-        self.forward = self.autoencoder2
+        self.forward = self.autoencoder1
     
     #Convolutional Autoencoder
     def autoencoder1(self, X):
