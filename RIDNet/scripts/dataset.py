@@ -32,4 +32,8 @@ class XRayDataset(Dataset):
             transforms.ToTensor(),
         ])
 
-        
+    def __len__(self):
+        """Return the number of paired clean and noisy images."""
+        return min(len(self.clean_files), len(self.noisy_files))
+
+
