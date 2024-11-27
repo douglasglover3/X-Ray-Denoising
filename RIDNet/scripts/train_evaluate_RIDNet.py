@@ -48,3 +48,7 @@ for epoch in range(epochs):
             tepoch.set_postfix(loss=loss.item())
 
     print(f"Epoch [{epoch + 1}/{epochs}], Loss: {epoch_loss / len(train_loader):.4f}")
+
+# Save the model
+torch.save(model.state_dict(), "ridnet.pth")
+print("Model saved to 'ridnet.pth'")
