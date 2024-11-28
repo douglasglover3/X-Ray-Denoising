@@ -4,12 +4,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torchvision.transforms import ToPILImage
 from tqdm import tqdm
 from dataset import XRayDataset
 from ridnet import RIDNet
-
+import matplotlib.pyplot as plt
 
 # Hyperparameters
 # batch_size = 32
@@ -96,11 +96,22 @@ for idx, (noisy_img, clean_img) in enumerate(test_loader):
 
     noisy_img, denoised_img, clean_img = map(to_pil, [noisy_img, denoised_img, clean_img])
 
-    # Show images
-    noisy_img.show(title="Noisy Image")
-    denoised_img.show(title="Denoised Image")
-    clean_img.show(title="Clean Image")
+    # Plot images using Matplotlib
+    fig, axs = plt.subplots(1, 3, figsize=(12, 4))
+    axs[0].imshow(noisy_img, cmap="gray")
+    axs[0].set_title("Noisy Image")
+    axs[0].axis("off")
 
+    axs[1].imshow(denoised_img, cmap="gray")
+    axs[1].set_title("Denoised Image")
+    axs[1].axis("off")
+
+    axs[2].imshow(clean_img, cmap="gray")
+    axs[2].set_title("Clean Image")
+    axs[2].axis("off")
+
+    # Show images
+    plt.show()
     # Break after showing 5 images for efficiency
     if idx == 4:
         break
