@@ -51,4 +51,4 @@ class RIDNet(nn.Module):
 
         # Add the residual connection to the output (skip connection)
         # This helps in learning the residual (difference) rather than the full transformation
-        return out + residual
+        return self.tail(residual) + out
