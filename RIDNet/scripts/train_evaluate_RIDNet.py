@@ -12,14 +12,10 @@ from ridnet import RIDNet
 import matplotlib.pyplot as plt
 
 # Hyperparameters
-# batch_size = 32
-# epochs = 50
-# learning_rate = 1e-3
+batch_size = 32
+epochs = 50
+learning_rate = 1e-3
 
-# Testing Hyperparameters
-batch_size = 8
-epochs = 1
-learning_rate = 5e-4
 
 # Prepare dataset and data loaders
 train_transform = transforms.Compose([
