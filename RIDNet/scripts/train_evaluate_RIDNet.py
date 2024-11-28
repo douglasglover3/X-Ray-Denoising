@@ -26,11 +26,7 @@ train_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# testing datasets
-train_dataset = XRayDataset(data_dir="data", split="train")
-test_dataset = XRayDataset(data_dir="data", split="test")
-
-# train_dataset = XRayDataset(data_dir="data", split="train")
+train_dataset = XRayDataset(data_dir="./", split="train")
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 # Initialize model, optimizer, and loss function
@@ -72,7 +68,7 @@ def calculate_psnr(denoised_img, clean_img):
 
 
 print("Starting testing...")
-test_dataset = XRayDataset(data_dir="data", split="test")
+test_dataset = XRayDataset(data_dir="./", split="test")
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 model.eval()
 
