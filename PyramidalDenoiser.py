@@ -41,10 +41,9 @@ def reconstruct_image(laplacian_pyramid):
         image = cv2.add(image, laplacian_pyramid[i])
     return image
 
-def add_gaussian_noise(image, mean=0, var=0.01):
+def add_gaussian_noise(image, mean=0, std=0.1):
     # Generate Gaussian noise
-    sigma = var ** 0.5
-    gaussian = np.random.normal(mean, sigma, image.shape)
+    gaussian = np.random.normal(mean, std, image.shape)
 
     #  Add the gaussian noise to the image
     noisy_image = np.clip(image + gaussian * 255, 0, 255).astype(np.uint8)
@@ -72,8 +71,8 @@ for file_path in glob.glob('Data/*.png'):
     print(f'Loading image: {file_path}')
     original_img = cv2.imread(file_path)
     noisy_img = add_gaussian_noise(original_img)
-    #loc = 'Noisy Images/' + os.path.basename(file_path)
-    #cv2.imwrite(loc, noisy_img)
+    noisy_loc = 'Noisy Images/' + os.path.basename(file_path)
+    cv2.imwrite(noisy_loc, noisy_img)
 
     start = time.time()
     gaussian_pyr = GaussianPyramid(noisy_img)
@@ -86,8 +85,8 @@ for file_path in glob.glob('Data/*.png'):
 
     elapsed = end - start
     print(f'Elapsed time: {elapsed} seconds')
-    #loc = 'Output/' + os.path.basename(file_path)
-    #cv2.imwrite(loc, reconstructed_image)
+    loc = 'Output/' + os.path.basename(file_path)
+    cv2.imwrite(loc, reconstructed_image)
     psnr_val = calculate_psnr(original_img, reconstructed_image)
     ssim_val = calculate_ssim(original_img, reconstructed_image)
     print(f'Peak signal to noise ratio between original image and denoised image: {psnr_val}')
