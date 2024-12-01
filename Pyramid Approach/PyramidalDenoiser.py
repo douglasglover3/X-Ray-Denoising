@@ -2,8 +2,6 @@ import os
 import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
-import glob
-import time
 
 class GaussianPyramid:
     def __init__(self, image, levels=5):
@@ -66,28 +64,3 @@ def calculate_ssim(original_image, denoised_image):
     # Calculate SSIM
     ssim_value, _ = ssim(original_gray, denoised_gray, full=True)
     return ssim_value
-
-for file_path in glob.glob('Data/*.png'):
-    print(f'Loading image: {file_path}')
-    original_img = cv2.imread(file_path)
-    noisy_img = add_gaussian_noise(original_img)
-    noisy_loc = 'Noisy Images/' + os.path.basename(file_path)
-    cv2.imwrite(noisy_loc, noisy_img)
-
-    start = time.time()
-    gaussian_pyr = GaussianPyramid(noisy_img)
-    laplacian_pyr = LaplacianPyramid(gaussian_pyr)
-
-    laplacian_levels = laplacian_pyr.build_pyramid()
-
-    reconstructed_image = reconstruct_image(laplacian_levels)
-    end = time.time()
-
-    elapsed = end - start
-    print(f'Elapsed time: {elapsed} seconds')
-    loc = 'Output/' + os.path.basename(file_path)
-    cv2.imwrite(loc, reconstructed_image)
-    psnr_val = calculate_psnr(original_img, reconstructed_image)
-    ssim_val = calculate_ssim(original_img, reconstructed_image)
-    print(f'Peak signal to noise ratio between original image and denoised image: {psnr_val}')
-    print(f'Structural similarity index between original image and denoised image: {ssim_val}')
