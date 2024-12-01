@@ -2,3 +2,9 @@ google-cloud-storage
 numpy
 opencv-python
 scikit-learn
+scikit-image
+torch
+torchvision
+matplotlib
+Pillow
+tqdm
