@@ -64,7 +64,7 @@ for i, image_path in enumerate(xray_images):
         plt.imshow(denoised_image, cmap='gray')
         plt.title(f'Denoised Image {i + 1}')
         plt.axis('off')
-        
+
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
 
