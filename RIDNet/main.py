@@ -2,7 +2,7 @@ import torch
 from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
-from scripts.ridnet import RIDNet  #
+from scripts.ridnet import RIDNet
 
 # Load the RIDNet model
 model = RIDNet()
@@ -18,7 +18,7 @@ def preprocess_image(image_path):
         transforms.Normalize((0.5,), (0.5,))  # Normalize (mean=0.5, std=0.5)
     ])
     image = Image.open(image_path).convert('L')  # Open and convert to grayscale
-    return transform(image).unsqueeze(0)  # Add batch dimension
+    return transform(image).unsqueeze(0), image  # Add batch dimension and return original
 
 
 def postprocess_image(tensor):
@@ -27,7 +27,7 @@ def postprocess_image(tensor):
     return transforms.ToPILImage()(tensor)
 
 
-# X-ray image file paths (replace with actual paths)
+# X-ray image file paths
 xray_images = ['data/final/test/00000002_000.png', 'data/final/test/00000003_000.png',
                'data/final/test/00000003_001.png']
 
@@ -35,18 +35,36 @@ xray_images = ['data/final/test/00000002_000.png', 'data/final/test/00000003_000
 for i, image_path in enumerate(xray_images):
     try:
         # Preprocess image
-        input_image = preprocess_image(image_path)
+        input_tensor, original_image = preprocess_image(image_path)
 
         # Denoise with the model
         with torch.no_grad():
-            denoised_image = model(input_image)
+            denoised_tensor = model(input_tensor)
 
-        # Postprocess and display the image
-        output_image = postprocess_image(denoised_image)
-        plt.figure()
-        plt.imshow(output_image, cmap='gray')
+        # Postprocess the image
+        denoised_image = postprocess_image(denoised_tensor)
+
+        # Display original, preprocessed, and denoised images
+        plt.figure(figsize=(15, 5))
+
+        # Original image
+        plt.subplot(1, 3, 1)
+        plt.imshow(original_image, cmap='gray')
+        plt.title(f'Original Image {i + 1}')
+        plt.axis('off')
+
+        # Preprocessed image
+        plt.subplot(1, 3, 2)
+        plt.imshow(input_tensor.squeeze().numpy(), cmap='gray')
+        plt.title(f'Preprocessed Image {i + 1}')
+        plt.axis('off')
+
+        # Postprocessed (Denoised) image
+        plt.subplot(1, 3, 3)
+        plt.imshow(denoised_image, cmap='gray')
         plt.title(f'Denoised Image {i + 1}')
         plt.axis('off')
+        
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
 
