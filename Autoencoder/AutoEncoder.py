@@ -8,17 +8,17 @@ class AutoEncoder(nn.Module):
         super(AutoEncoder, self).__init__()
 
         # Defined layers for convolutional encoder
-        self.encoder_conv1 = nn.Conv2d(3, 8, 3, padding=1)
-        self.encoder_conv2 = nn.Conv2d(8, 16, 3, padding=1)
-        self.encoder_conv3 = nn.Conv2d(16, 32, 3, padding=1)
-        self.encoder_conv4 = nn.Conv2d(32, 64, 3, padding=1)
+        self.encoder_conv1 = nn.Conv2d(1, 4, 3, padding=1)
+        self.encoder_conv2 = nn.Conv2d(4, 8, 3, padding=1)
+        self.encoder_conv3 = nn.Conv2d(8, 16, 3, padding=1)
+        self.encoder_conv4 = nn.Conv2d(16, 32, 3, padding=1)
 
         # Defined layers for convolutional decoder
-        self.decoder_conv1 = nn.Conv2d(64, 32, 3, padding=1)
-        self.decoder_conv2 = nn.Conv2d(32, 16, 3, padding=1)
-        self.decoder_conv3 = nn.Conv2d(16, 16, 3, padding=1)
-        self.decoder_conv4 = nn.Conv2d(16, 8, 3, padding=1)
-        self.decoder_conv5 = nn.Conv2d(8, 3, 3, padding=1)
+        self.decoder_conv1 = nn.Conv2d(32, 16, 3, padding=1)
+        self.decoder_conv2 = nn.Conv2d(16, 8, 3, padding=1)
+        self.decoder_conv3 = nn.Conv2d(8, 8, 3, padding=1)
+        self.decoder_conv4 = nn.Conv2d(8, 4, 3, padding=1)
+        self.decoder_conv5 = nn.Conv2d(4, 1, 3, padding=1)
         
         self.forward = self.autoencoder2
     

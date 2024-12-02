@@ -1,4 +1,4 @@
-/data/images
-/outputs
+/data
+/Autoencoder/outputs
 /venv
 /__pycache__
