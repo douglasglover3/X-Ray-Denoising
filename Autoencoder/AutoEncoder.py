@@ -23,17 +23,17 @@ class AutoEncoder(nn.Module):
         self.forward = self.autoencoder2
     
     #Convolutional Autoencoder
-    def autoencoder1(self, X):
+    def autoencoder1(self, X): # (Avg epoch time: 3 hours, 18 minutes, 35 seconds)
         X = self.encoder1(X)
         X = self.decoder1(X)
         return X
     
-    def autoencoder2(self, X): #One less convolutional layer than autoencoder1
+    def autoencoder2(self, X): #One less convolutional layer than autoencoder1 (Avg epoch time: 5 minutes, 20 seconds)
         X = self.encoder2(X)
         X = self.decoder2(X)
         return X
     
-    def autoencoder3(self, X): #Two less convolutional layers than autoencoder1
+    def autoencoder3(self, X): #Two less convolutional layers than autoencoder1 (Avg epoch time: 4 min, 20 seconds)
         X = self.encoder3(X)
         X = self.decoder3(X)
         return X
