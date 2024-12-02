@@ -132,6 +132,7 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
             eta = (sum(batch_times, datetime.timedelta(0)) / len(batch_times)) * (num_batches - batch_index)
         print('\n')
             
+    print('Saving testing images...')
     #Save one image from each batch
     fig, axes = plt.subplots(1, 3)
     for index, (title, image) in enumerate(images):
