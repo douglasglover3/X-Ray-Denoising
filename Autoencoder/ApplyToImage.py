@@ -28,6 +28,8 @@ def apply_autoencoder(autoencoder: AutoEncoder, original, noisy):
         original_image = original.permute(1, 2, 0).view(1024, 1024).numpy()
         noisy_image = noisy.permute(1, 2, 0).view(1024, 1024).numpy()
         output_image = output.permute(1, 2, 0).detach().view(1024, 1024).numpy()
+
+        #Calculate metrics
         psnr = calculate_psnr(original_image, output_image)
         ssim = calculate_ssim(original_image, output_image)
 
@@ -69,6 +71,7 @@ noisy_transform = transforms.Compose([
     AddGaussianNoise(0., 0.1)
 ])
 
+#Grab arguments
 parser = argparse.ArgumentParser('Autoencoder apply to image')
 parser.add_argument('--image', type=str, default='data/images/00000001_000.png', help='Path for image to apply.')
 FLAGS = None

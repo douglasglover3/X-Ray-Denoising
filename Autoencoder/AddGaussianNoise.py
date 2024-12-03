@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 
+#Transform for applying gaussian noise
 class AddGaussianNoise(object):
     def __init__(self, mean=0., std=0.1):
         self.std = std
