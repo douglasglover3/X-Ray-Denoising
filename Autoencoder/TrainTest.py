@@ -207,7 +207,7 @@ def run_main(FLAGS):
         transforms.Grayscale(),
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,)),
-        AddGaussianNoise(0., 0.1)
+        AddGaussianNoise(0., FLAGS.std)
     ])
 
 
@@ -279,7 +279,7 @@ def run_main(FLAGS):
     
 if __name__ == '__main__':
     # Set parameters for Sparse Autoencoder
-    parser = argparse.ArgumentParser('CNN Exercise.')
+    parser = argparse.ArgumentParser('Autoencoder training and testing.')
     parser.add_argument('--load_model',
                         action=argparse.BooleanOptionalAction, default=False, 
                         help='Adding this flag will load the model from file.')
@@ -289,6 +289,9 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate',
                         type=float, default=0.01,
                         help='Initial learning rate.')
+    parser.add_argument('--std',
+                        type=float, default=0.1,
+                        help='Variation for noise generation.')
     parser.add_argument('--num_epochs',
                         type=int,
                         default=10,

@@ -2,17 +2,17 @@
 ## Autoencoder
 
 
-### Simple setup
+### Simple demo
 
 Use pip install -r requirements.txt to install all necessary libraries.
 
-Use the following command to run test images in autoencoder model.
-This will add noise to the xray images and the autoencoder will attempt to denoise them.
-This will output PSNR and SSIM analytics, as well as a test image from each batch for examination.
+Use the following command to apply the autoencoder onto an image at the defined image path. It will automatically add noise to the image and produce an output image.
 
-`python Autoencoder/TrainTest.py --load_model`
+`python Autoencoder/ApplyToImage.py --image <image-path>`
 
-### Additional details
+Results are saved as Autoencoder/result.png.
+
+### Training and other details
 
 Use pip install -r requirements.txt to install all necessary libraries.
 
