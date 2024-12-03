@@ -12,7 +12,23 @@ from AddGaussianNoise import AddGaussianNoise
 import argparse
 import numpy as np 
 import datetime
+from skimage.metrics import structural_similarity as ssim
 
+
+def calculate_psnr(original_image, denoised_image):
+    mse = np.mean((original_image - denoised_image) ** 2)
+    if mse == 0:
+        return float('inf') # Infinite PSNR, meaning no noise at all
+    max_pixel = 255.0
+    psnr_value = 20 * np.log10(max_pixel / np.sqrt(mse))
+    return psnr_value
+
+def calculate_ssim(original_image, denoised_image):
+    # Calculate SSIM
+    ssim_value, _ = ssim(original_image, denoised_image, full=True, data_range=2)
+    return ssim_value
+
+#Training process
 def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, optimizer, criterion, batch_size):
     '''
     Trains the model for an epoch and optimizes it.
@@ -68,6 +84,7 @@ def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, 
         eta = (sum(batch_times, datetime.timedelta(0)) / len(batch_times)) * (num_batches - batch_index)
     print('\n')
 
+    #Send data to cpu
     data = data.to('cpu')
     noisy = noisy.to('cpu')
     output = output.to('cpu')
@@ -77,6 +94,7 @@ def train(autoencoder: AutoEncoder, device, train_dataset, train_noisy_dataset, 
     images.append(('Noisy Image', noisy[0].permute(1, 2, 0)))
     images.append(('Decoded Image', output[0].permute(1, 2, 0).detach().numpy()))       
         
+    #Output average loss for this epoch
     train_loss = float(np.mean(losses))
     print('Train set: Average loss: {:.4f}\n'.format(float(np.mean(losses))))
     
@@ -100,26 +118,38 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
 
         batch_times = []
         eta = datetime.timedelta(seconds=0)
+        total_psnr = 0
+        total_ssim = 0
         for batch_index in range(0, num_batches):
             start = datetime.datetime.now()
             data_array = [test_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
             noisy_array = [test_noisy_dataset[i][0].numpy() for i in range(batch_index * batch_size, (batch_index+1) * batch_size)]
 
+            #Convert images for processing
             data = torch.tensor(np.array(data_array))
-
             noisy = torch.tensor(np.array(noisy_array))
             noisy = noisy.to(device)
 
             # Predict for data by doing forward pass
             output: torch.Tensor = autoencoder(noisy)
 
+            #Send to cpu
             data = data.to('cpu')
             noisy = noisy.to('cpu')
             output = output.to('cpu')
             
-            images.append(('Original Image ' + str(batch_index), data[0].permute(1, 2, 0)))
-            images.append(('Noisy Image ' + str(batch_index), noisy[0].permute(1, 2, 0)))
-            images.append(('Decoded Image ' + str(batch_index), output[0].permute(1, 2, 0).detach().numpy()))
+            #Calculate metrics
+            for i in range(0, batch_size):
+                original_image = data[i].permute(1, 2, 0).view(1024, 1024).numpy()
+                noisy_image = noisy[i].permute(1, 2, 0).view(1024, 1024).numpy()
+                output_image = output[i].permute(1, 2, 0).detach().view(1024, 1024).numpy()
+                total_psnr += calculate_psnr(original_image, output_image)
+                total_ssim += calculate_ssim(original_image, output_image)
+
+            #Grab one image from batch for examination
+            images.append(('Original Image ' + str(batch_index), original_image))
+            images.append(('Noisy Image ' + str(batch_index), noisy_image))
+            images.append(('Decoded Image ' + str(batch_index), output_image))
 
             # Update progress bar
             percent = 100 * ((batch_index + 1) / num_batches)
@@ -130,7 +160,10 @@ def test(autoencoder: AutoEncoder, device, test_dataset, test_noisy_dataset, bat
             if len(batch_times) > 10:
                 batch_times.pop(0)
             eta = (sum(batch_times, datetime.timedelta(0)) / len(batch_times)) * (num_batches - batch_index)
+            
         print('\n')
+        print('PSNR: ' + str(total_psnr / (num_batches * batch_size)))
+        print('SSIM: ' + str(total_ssim / (num_batches * batch_size)))
             
     print('Saving testing images...')
     #Save one image from each batch
@@ -177,7 +210,7 @@ def run_main(FLAGS):
         transforms.Grayscale(),
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,)),
-        AddGaussianNoise(0., 0.1)
+        AddGaussianNoise(0., FLAGS.std)
     ])
 
 
@@ -249,7 +282,7 @@ def run_main(FLAGS):
     
 if __name__ == '__main__':
     # Set parameters for Sparse Autoencoder
-    parser = argparse.ArgumentParser('CNN Exercise.')
+    parser = argparse.ArgumentParser('Autoencoder training and testing.')
     parser.add_argument('--load_model',
                         action=argparse.BooleanOptionalAction, default=False, 
                         help='Adding this flag will load the model from file.')
@@ -259,6 +292,9 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate',
                         type=float, default=0.01,
                         help='Initial learning rate.')
+    parser.add_argument('--std',
+                        type=float, default=0.1,
+                        help='Variation for noise generation.')
     parser.add_argument('--num_epochs',
                         type=int,
                         default=10,
