@@ -1,8 +1,10 @@
 import torch
 from torchvision import transforms
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 from scripts.ridnet import RIDNet
+from skimage.metrics import structural_similarity as ssim
 
 # Load the RIDNet model
 model = RIDNet()
@@ -27,11 +29,22 @@ def postprocess_image(tensor):
     return transforms.ToPILImage()(tensor)
 
 
+def calculate_ssim(image1, image2):
+    """
+    Calculate SSIM between two images.
+
+    :param image1: First image (numpy array).
+    :param image2: Second image (numpy array).
+    :return: SSIM score.
+    """
+    return ssim(image1, image2, data_range=image2.max() - image2.min())
+
+
 # X-ray image file paths
 xray_images = ['data/final/test/00000002_000.png', 'data/final/test/00000003_000.png',
                'data/final/test/00000003_001.png']
 
-# Denoise and display images
+# Modify denoise and display loop to include SSIM calculation
 for i, image_path in enumerate(xray_images):
     try:
         # Preprocess image
@@ -43,6 +56,12 @@ for i, image_path in enumerate(xray_images):
 
         # Postprocess the image
         denoised_image = postprocess_image(denoised_tensor)
+
+        # Calculate SSIM
+        original_np = np.array(original_image)
+        denoised_np = np.array(denoised_image)
+        ssim_score = calculate_ssim(original_np, denoised_np)
+        print(f"SSIM for Image {i + 1}: {ssim_score}")
 
         # Display original, preprocessed, and denoised images
         plt.figure(figsize=(15, 5))
@@ -62,10 +81,12 @@ for i, image_path in enumerate(xray_images):
         # Postprocessed (Denoised) image
         plt.subplot(1, 3, 3)
         plt.imshow(denoised_image, cmap='gray')
-        plt.title(f'Denoised Image {i + 1}')
+        plt.title(f'Denoised Image {i + 1} (SSIM: {ssim_score:.4f})')
         plt.axis('off')
 
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
 
 plt.show()
+
+
