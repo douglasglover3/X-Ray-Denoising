@@ -1,6 +1,7 @@
 import torch
 from torchvision import transforms
 import numpy as np
+import time
 from PIL import Image
 import matplotlib.pyplot as plt
 from scripts.ridnet import RIDNet
@@ -44,15 +45,27 @@ def calculate_ssim(image1, image2):
 xray_images = ['data/final/test/00000002_000.png', 'data/final/test/00000003_000.png',
                'data/final/test/00000003_001.png']
 
+# Initialize variables to calculate average denoising time
+total_time = 0
+image_count = len(xray_images)
+
 # Modify denoise and display loop to include SSIM calculation
 for i, image_path in enumerate(xray_images):
     try:
+        # Start timing
+        start_time = time.time()
+
         # Preprocess image
         input_tensor, original_image = preprocess_image(image_path)
 
         # Denoise with the model
         with torch.no_grad():
             denoised_tensor = model(input_tensor)
+
+        # Stop timing
+        elapsed_time = time.time() - start_time
+        total_time += elapsed_time
+        print(f"Time taken for Image {i + 1}: {elapsed_time:.4f} seconds")
 
         # Postprocess the image
         denoised_image = postprocess_image(denoised_tensor)
@@ -86,6 +99,10 @@ for i, image_path in enumerate(xray_images):
 
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
+
+# Calculate and print average time
+average_time = total_time / image_count
+print(f"Average time to denoise images: {average_time:.4f} seconds")
 
 plt.show()
 

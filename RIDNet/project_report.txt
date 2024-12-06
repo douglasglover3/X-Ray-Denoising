@@ -32,6 +32,11 @@ Testing and Accuracy: During testing, the average PSNR achieved was:
     * First Test Run: 48.99 dB
     * Second Test Run: 55.31 dB
 
+    The best SSIM achieved was:
+    * Second Image: .7491
+
+    The average time to denoise images: 0.6625 seconds
+
 These results indicate that RIDNet performed exceptionally well in reconstructing clean images from noisy inputs. The improvement in PSNR between runs highlights the robustness of the model after iterative refinements.
 
 Key Insights
