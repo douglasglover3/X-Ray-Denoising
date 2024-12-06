@@ -2,6 +2,8 @@ import cv2
 import time
 import glob
 import os
+
+import numpy as np
 from PyramidalDenoiser import GaussianPyramid
 from PyramidalDenoiser import LaplacianPyramid
 from PyramidalDenoiser import add_gaussian_noise
@@ -36,8 +38,8 @@ def denoise_images():
         print(f'Elapsed time: {elapsed} seconds')
         loc = 'Output/' + os.path.basename(file_path)
         #cv2.imwrite(loc, reconstructed_image)
-        psnr_val = calculate_psnr(original_img, reconstructed_image)
-        ssim_val = calculate_ssim(original_img, reconstructed_image)
+        psnr_val = calculate_psnr((original_img / 255).astype(np.float32), (noisy_img / 255).astype(np.float32))
+        ssim_val = calculate_ssim((original_img / 255).astype(np.float32), (noisy_img / 255).astype(np.float32))
         total_psnr += psnr_val
         total_ssim += ssim_val
         total_time += elapsed

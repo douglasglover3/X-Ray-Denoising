@@ -62,5 +62,5 @@ def calculate_ssim(original_image, denoised_image):
     denoised_gray = cv2.cvtColor(denoised_image, cv2.COLOR_BGR2GRAY)
 
     # Calculate SSIM
-    ssim_value, _ = ssim(original_gray, denoised_gray, full=True)
+    ssim_value, _ = ssim(original_gray, denoised_gray, full=True, data_range=2)
     return ssim_value
