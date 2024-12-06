@@ -8,6 +8,10 @@ def extract_data():
     extract_loc = 'Data/'
     if (not os.path.exists(extract_loc)):
         os.mkdir(extract_loc)
+    if (not os.path.exists('Noisy/')):
+        os.mkdir('Noisy/')
+    if (not os.path.exists('Output/')):
+        os.mkdir('Output/')
     # URLs for the zip files (This code comes from the batch_download_zips.py code provided in the NIH dataset)
     links = [
         'https://nihcc.box.com/shared/static/vfk49d74nhbxq3nqjg0900w5nvkorp5c.gz',
@@ -33,12 +37,9 @@ def extract_data():
                 urllib.request.urlretrieve(link, fn)  # download the zip file
         print("Download complete. Please check the checksums")
 
-    for file in tar_gz_files:
-        with tarfile.open(file, "r:gz") as tar:
-            tar.extractall(path='Data/')
-            print(f"Extracted contents to {os.path.join(os.getcwd(), extract_loc)}")
-
-    if (not os.path.exists('../Noisy Images/')):
-        os.mkdir('../Noisy Images/')
-    if (not os.path.exists('../Output/')):
-        os.mkdir('../Noisy Images/')
+    if tar_gz_files:
+        for file in tar_gz_files:
+            with tarfile.open(file, "r:gz") as tar:
+                tar.extractall(path='Data/')
+                print(f"Extracted contents to {os.path.join(os.getcwd(), extract_loc)}")
+            os.remove(file)
